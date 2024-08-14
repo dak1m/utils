@@ -1,0 +1,9 @@
+log/
+.idea
+*.exe
+.vscode
+*log.txt
+db.conf
+.env
+data/
+~                           
