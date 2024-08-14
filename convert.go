@@ -9,6 +9,11 @@ import (
 	"time"
 )
 
+// ConversionFrom is an interface to allow retrieve data from data source
+type ConversionFrom interface {
+	FromSource(string) error
+}
+
 // MapConvertStructByTag 通过tag匹配结构体字段并赋值
 func MapConvertStructByTag(input map[string]string, obj interface{}, tag string) (err error) {
 	if reflect.TypeOf(obj).Kind() != reflect.Ptr {
@@ -35,7 +40,11 @@ func MapConvertStructByTag(input map[string]string, obj interface{}, tag string)
 		flag := 1
 		if (field.Type.Kind() == reflect.Struct || field.Type.Kind() == reflect.Slice || field.Type.Kind() == reflect.Array) && tagName != "" {
 			if val, ok := input[tagName]; ok {
-				_ = json.Unmarshal([]byte(val), v.Field(i).Addr().Interface())
+				if structConvert, ok2 := v.Field(i).Interface().(ConversionFrom); ok2 {
+					return structConvert.FromSource(val)
+				} else {
+					_ = json.Unmarshal([]byte(val), v.Field(i).Addr().Interface())
+				}
 				flag = 2
 			}
 		}
@@ -204,7 +213,8 @@ func StructConvertMapByTag(obj interface{}, tag string) map[string]any {
 				}
 			}
 
-			data[tagName], _ = json.Marshal(v.Field(i).Interface())
+			b, _ := json.Marshal(v.Field(i).Interface())
+			data[tagName] = string(b)
 			flag = 2
 		}
 
