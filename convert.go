@@ -9,6 +9,7 @@ import (
 	"time"
 )
 
+// MapConvertStructByTag 通过tag匹配结构体字段并赋值
 func MapConvertStructByTag(input map[string]string, obj interface{}, tag string) (err error) {
 	if reflect.TypeOf(obj).Kind() != reflect.Ptr {
 		return
