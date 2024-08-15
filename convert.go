@@ -44,13 +44,21 @@ func MapConvertStructByTag(input map[string]string, obj interface{}, tag string)
 				v.Field(i).Set(newValue)
 				if v.Field(i).CanAddr() {
 					if structConvert, ok2 := v.Field(i).Addr().Interface().(ConversionFrom); ok2 {
-						return structConvert.FromSource(val)
+						err = structConvert.FromSource(val)
+						if err != nil {
+							return
+						}
+						continue
 					} else {
 						_ = json.Unmarshal([]byte(val), v.Field(i).Addr().Interface())
 					}
 				}
 				if structConvert, ok2 := v.Field(i).Interface().(ConversionFrom); ok2 {
-					return structConvert.FromSource(val)
+					err = structConvert.FromSource(val)
+					if err != nil {
+						return
+					}
+					continue
 				}
 
 				flag = 2
@@ -84,7 +92,7 @@ func MapConvertStructByTag(input map[string]string, obj interface{}, tag string)
 					val = field.Tag.Get("default")
 				}
 				var setVal reflect.Value
-				setVal, err = decode(val, field.Type.Kind())
+				setVal, err = decode(val, field.Type, field.Type.Kind())
 				if err != nil {
 					return
 				}
@@ -96,88 +104,94 @@ func MapConvertStructByTag(input map[string]string, obj interface{}, tag string)
 	return
 }
 
-func decode(input string, intType reflect.Kind) (resVal reflect.Value, err error) {
-	switch intType {
+func decode(input string, fieldType reflect.Type, inType reflect.Kind) (resVal reflect.Value, err error) {
+	fieldVal := func(val any) reflect.Value {
+		if fieldType.PkgPath() != "" {
+			return reflect.ValueOf(val).Convert(fieldType)
+		}
+		return reflect.ValueOf(val)
+	}
+	switch inType {
 	case reflect.Int:
 		val, err := strconv.Atoi(input)
 		if err != nil {
 			return reflect.Value{}, err
 		}
-		resVal = reflect.ValueOf(val)
+		resVal = fieldVal(val)
 	case reflect.Int8:
 		val, err := strconv.ParseInt(input, 10, 8)
 		if err != nil {
 			return reflect.Value{}, err
 		}
-		resVal = reflect.ValueOf(int8(val))
+		resVal = fieldVal(int8(val))
 	case reflect.Int16:
 		val, err := strconv.ParseInt(input, 10, 16)
 		if err != nil {
 			return reflect.Value{}, err
 		}
-		resVal = reflect.ValueOf(int16(val))
+		resVal = fieldVal(int16(val))
 	case reflect.Int32:
 		val, err := strconv.ParseInt(input, 10, 32)
 		if err != nil {
 			return reflect.Value{}, err
 		}
-		resVal = reflect.ValueOf(int32(val))
+		resVal = fieldVal(int32(val))
 	case reflect.Int64:
 		val, err := strconv.ParseInt(input, 10, 64)
 		if err != nil {
 			return reflect.Value{}, err
 		}
-		resVal = reflect.ValueOf(val)
+		resVal = fieldVal(val)
 	case reflect.Uint:
 		val, err := strconv.ParseUint(input, 10, 0)
 		if err != nil {
 			return reflect.Value{}, err
 		}
-		resVal = reflect.ValueOf(uint(val))
+		resVal = fieldVal(uint(val))
 	case reflect.Uint8:
 		val, err := strconv.ParseUint(input, 10, 8)
 		if err != nil {
 			return reflect.Value{}, err
 		}
-		resVal = reflect.ValueOf(uint8(val))
+		resVal = fieldVal(uint8(val))
 	case reflect.Uint16:
 		val, err := strconv.ParseUint(input, 10, 16)
 		if err != nil {
 			return reflect.Value{}, err
 		}
-		resVal = reflect.ValueOf(uint16(val))
+		resVal = fieldVal(uint16(val))
 	case reflect.Uint32:
 		val, err := strconv.ParseUint(input, 10, 32)
 		if err != nil {
 			return reflect.Value{}, err
 		}
-		resVal = reflect.ValueOf(uint32(val))
+		resVal = fieldVal(uint32(val))
 	case reflect.Uint64:
 		val, err := strconv.ParseUint(input, 10, 64)
 		if err != nil {
 			return reflect.Value{}, err
 		}
-		resVal = reflect.ValueOf(val)
+		resVal = fieldVal(val)
 	case reflect.String:
-		resVal = reflect.ValueOf(input)
+		resVal = fieldVal(input)
 	case reflect.Bool:
 		val, err := strconv.ParseBool(input)
 		if err != nil {
 			return reflect.Value{}, err
 		}
-		resVal = reflect.ValueOf(val)
+		resVal = fieldVal(val)
 	case reflect.Float32:
 		val, err := strconv.ParseFloat(input, 32)
 		if err != nil {
 			return reflect.Value{}, err
 		}
-		resVal = reflect.ValueOf(float32(val))
+		resVal = fieldVal(float32(val))
 	case reflect.Float64:
 		val, err := strconv.ParseFloat(input, 64)
 		if err != nil {
 			return reflect.Value{}, err
 		}
-		resVal = reflect.ValueOf(val)
+		resVal = fieldVal(val)
 	default:
 		return reflect.Value{}, fmt.Errorf("unsupported type")
 	}
@@ -363,7 +377,7 @@ func AnonymousStructAssignment(ft reflect.StructField, fv reflect.Value, tag str
 					val = field.Tag.Get("default")
 				}
 				var setVal reflect.Value
-				setVal, err := decode(val, field.Type.Kind())
+				setVal, err := decode(val, field.Type, field.Type.Kind())
 				if err != nil {
 					return err
 				}
