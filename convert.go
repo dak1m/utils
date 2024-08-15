@@ -40,11 +40,19 @@ func MapConvertStructByTag(input map[string]string, obj interface{}, tag string)
 		flag := 1
 		if (field.Type.Kind() == reflect.Struct || field.Type.Kind() == reflect.Slice || field.Type.Kind() == reflect.Array) && tagName != "" {
 			if val, ok := input[tagName]; ok {
+				newValue := reflect.New(field.Type)
+				v.Field(i).Set(newValue)
+				if v.Field(i).CanAddr() {
+					if structConvert, ok2 := v.Field(i).Addr().Interface().(ConversionFrom); ok2 {
+						return structConvert.FromSource(val)
+					} else {
+						_ = json.Unmarshal([]byte(val), v.Field(i).Addr().Interface())
+					}
+				}
 				if structConvert, ok2 := v.Field(i).Interface().(ConversionFrom); ok2 {
 					return structConvert.FromSource(val)
-				} else {
-					_ = json.Unmarshal([]byte(val), v.Field(i).Addr().Interface())
 				}
+
 				flag = 2
 			}
 		}
