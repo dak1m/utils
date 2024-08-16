@@ -271,10 +271,10 @@ func StructConvertMapByTag(obj interface{}, tag string) map[string]any {
 				if ptr {
 					if v.Field(i).IsNil() {
 						continue
+					} else {
+						data[tagName] = reflect.Indirect(v.Field(i)).Interface()
+						continue
 					}
-				} else {
-					data[tagName] = reflect.Indirect(v.Field(i)).Interface()
-					continue
 				}
 				data[tagName] = v.Field(i).Interface()
 			}
@@ -340,10 +340,10 @@ func AnonymousStructToMap(ft reflect.StructField, fv reflect.Value, tag string, 
 				if ptr {
 					if fv.Field(j).IsNil() {
 						continue
+					} else {
+						data[tagName] = reflect.Indirect(fv.Field(j)).Interface()
+						continue
 					}
-				} else {
-					data[tagName] = reflect.Indirect(fv.Field(j)).Interface()
-					continue
 				}
 				data[tagName] = fv.Field(j).Interface()
 			}

@@ -45,6 +45,7 @@ func TestMapConvertStructByTag(t *testing.T) {
 }
 
 type TestStruct struct {
+	Normal   string            `json:"normal"`
 	Account  *CustomStructList `json:"account"`
 	Birthday Birthday          `json:"birthday"`
 	Ptr      *string           `json:"ptr"`
@@ -100,14 +101,20 @@ func TestStructConvertMapByTag(t *testing.T) {
 				},
 				tag: "json",
 			},
+			want: map[string]any{
+				"normal":   "",
+				"account":  "[{\"balance\":\"200\",\"other_balance\":\"0\"}]",
+				"birthday": Birthday(""),
+				"ptr":      "111",
+			},
 		}}
 	for _, tt := range tests {
 		t.Run(
 			tt.name, func(t *testing.T) {
-				//ptr := "111"
-				//a := tt.args.obj.(TestStruct)
-				//a.Ptr = &ptr
-				//tt.args.obj = a
+				ptr := "111"
+				a := tt.args.obj.(TestStruct)
+				a.Ptr = &ptr
+				tt.args.obj = a
 				if got := StructConvertMapByTag(tt.args.obj, tt.args.tag); !reflect.DeepEqual(got, tt.want) {
 					t.Errorf("StructConvertMapByTag() = %v, want %v", got, tt.want)
 				}
