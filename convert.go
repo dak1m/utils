@@ -364,11 +364,12 @@ func AnonymousStructAssignment(ft reflect.StructField, fv reflect.Value, tag str
 			continue
 		}
 
+		fieldType := field.Type
 		if field.Type.Kind() == reflect.Ptr {
-			field.Type = field.Type.Elem()
+			fieldType = fieldType.Elem()
 		}
 		flag := 1
-		if (field.Type.Kind() == reflect.Struct || field.Type.Kind() == reflect.Slice || field.Type.Kind() == reflect.Array) && tagName != "" {
+		if (fieldType.Kind() == reflect.Struct || fieldType.Kind() == reflect.Slice || fieldType.Kind() == reflect.Array) && tagName != "" {
 			if val, ok := input[tagName]; ok {
 				_ = json.Unmarshal([]byte(val), fv.Field(j).Addr().Interface())
 				flag = 2
@@ -402,7 +403,7 @@ func AnonymousStructAssignment(ft reflect.StructField, fv reflect.Value, tag str
 					val = field.Tag.Get("default")
 				}
 				var setVal reflect.Value
-				setVal, err := decode(val, field.Type, field.Type.Kind())
+				setVal, err := decode(val, field.Type, fieldType.Kind())
 				if err != nil {
 					return err
 				}
