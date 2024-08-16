@@ -34,13 +34,14 @@ func MapConvertStructByTag(input map[string]string, obj interface{}, tag string)
 			continue
 		}
 
+		fieldType := field.Type
 		if field.Type.Kind() == reflect.Ptr {
-			field.Type = field.Type.Elem()
+			fieldType = fieldType.Elem()
 		}
 		flag := 1
-		if (field.Type.Kind() == reflect.Struct || field.Type.Kind() == reflect.Slice || field.Type.Kind() == reflect.Array) && tagName != "" {
+		if (fieldType.Kind() == reflect.Struct || fieldType.Kind() == reflect.Slice || fieldType.Kind() == reflect.Array) && tagName != "" {
 			if val, ok := input[tagName]; ok {
-				newValue := reflect.New(field.Type)
+				newValue := reflect.New(fieldType)
 				v.Field(i).Set(newValue)
 				if v.Field(i).CanAddr() {
 					if structConvert, ok2 := v.Field(i).Addr().Interface().(ConversionFrom); ok2 {
@@ -92,7 +93,7 @@ func MapConvertStructByTag(input map[string]string, obj interface{}, tag string)
 					val = field.Tag.Get("default")
 				}
 				var setVal reflect.Value
-				setVal, err = decode(val, field.Type, field.Type.Kind())
+				setVal, err = decode(val, field.Type, fieldType.Kind())
 				if err != nil {
 					return
 				}
@@ -106,10 +107,18 @@ func MapConvertStructByTag(input map[string]string, obj interface{}, tag string)
 
 func decode(input string, fieldType reflect.Type, inType reflect.Kind) (resVal reflect.Value, err error) {
 	fieldVal := func(val any) reflect.Value {
-		if fieldType.PkgPath() != "" {
-			return reflect.ValueOf(val).Convert(fieldType)
+		reflectVal := reflect.ValueOf(val)
+		if fieldType.Kind() == reflect.Ptr {
+			fieldType = fieldType.Elem()
+			ptr := reflect.New(fieldType)
+			ptr.Elem().Set(reflect.ValueOf(val))
+
+			reflectVal = ptr
 		}
-		return reflect.ValueOf(val)
+		if fieldType.PkgPath() != "" {
+			return reflectVal.Convert(fieldType)
+		}
+		return reflectVal
 	}
 	switch inType {
 	case reflect.Int:
@@ -259,6 +268,14 @@ func StructConvertMapByTag(obj interface{}, tag string) map[string]any {
 			}
 		default:
 			if flag == 1 {
+				if ptr {
+					if v.Field(i).IsNil() {
+						continue
+					}
+				} else {
+					data[tagName] = reflect.Indirect(v.Field(i)).Interface()
+					continue
+				}
 				data[tagName] = v.Field(i).Interface()
 			}
 		}
