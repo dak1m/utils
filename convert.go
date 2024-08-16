@@ -337,6 +337,14 @@ func AnonymousStructToMap(ft reflect.StructField, fv reflect.Value, tag string, 
 			}
 		default:
 			if flag == 1 {
+				if ptr {
+					if fv.Field(j).IsNil() {
+						continue
+					}
+				} else {
+					data[tagName] = reflect.Indirect(fv.Field(j)).Interface()
+					continue
+				}
 				data[tagName] = fv.Field(j).Interface()
 			}
 		}

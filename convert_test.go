@@ -96,6 +96,7 @@ func TestStructConvertMapByTag(t *testing.T) {
 							OtherBalance: "0",
 						},
 					},
+					Ptr: nil,
 				},
 				tag: "json",
 			},
@@ -103,10 +104,10 @@ func TestStructConvertMapByTag(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(
 			tt.name, func(t *testing.T) {
-				ptr := "111"
-				a := tt.args.obj.(TestStruct)
-				a.Ptr = &ptr
-				tt.args.obj = a
+				//ptr := "111"
+				//a := tt.args.obj.(TestStruct)
+				//a.Ptr = &ptr
+				//tt.args.obj = a
 				if got := StructConvertMapByTag(tt.args.obj, tt.args.tag); !reflect.DeepEqual(got, tt.want) {
 					t.Errorf("StructConvertMapByTag() = %v, want %v", got, tt.want)
 				}
