@@ -1,11 +1,14 @@
 package utils
 
-import "reflect"
+import (
+	"reflect"
+	"slices"
+)
 
 var DefaultTag = "json"
 
 // IsOnlySet checks if only the X field is set and all other fields are zero values.
-func IsOnlySet(obj any, field string) bool {
+func IsOnlySet(obj any, field string, exclude ...string) bool {
 	t := reflect.TypeOf(obj)
 	v := reflect.ValueOf(obj)
 	for i := 0; i < v.NumField(); i++ {
@@ -15,7 +18,7 @@ func IsOnlySet(obj any, field string) bool {
 			if reflectField.IsZero() {
 				return false
 			}
-		} else {
+		} else if !slices.Contains(exclude, name) {
 			if !reflectField.IsZero() {
 				return false
 			}
