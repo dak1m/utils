@@ -1,8 +1,11 @@
 package utils
 
 import (
+	"fmt"
+	"math"
 	"reflect"
 	"slices"
+	"strconv"
 )
 
 var DefaultTag = "json"
@@ -25,4 +28,17 @@ func IsOnlySet(obj any, field string, exclude ...string) bool {
 		}
 	}
 	return true
+}
+
+func FloatStrTrim(s string) string {
+	f, _ := strconv.ParseFloat(s, 64)
+	d1 := int(f*math.Pow10(2)) % 10
+	d2 := int(f*math.Pow10(1)) % 10
+	if d1 == 0 && d2 == 0 {
+		return fmt.Sprintf("%.0f", f)
+	} else if d1 == 0 {
+		return fmt.Sprintf("%.1f", f)
+	} else {
+		return fmt.Sprintf("%.2f", f)
+	}
 }

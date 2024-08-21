@@ -24,9 +24,13 @@ func TestIsOnlySet(t *testing.T) {
 					Name  string     `json:"name"`
 					Age   int        `json:"age"`
 					Start *time.Time `json:"start"`
+					Nest
 				}{
 					Id:    "1",
 					Start: timePtr(time.Now()),
+					Nest: Nest{
+						Name: "name",
+					},
 				},
 				field:   "start",
 				exclude: []string{"id"},
@@ -44,4 +48,8 @@ func TestIsOnlySet(t *testing.T) {
 
 func timePtr(t time.Time) *time.Time {
 	return &t
+}
+
+type Nest struct {
+	Name string
 }
