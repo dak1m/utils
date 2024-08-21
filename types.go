@@ -19,5 +19,5 @@ func (a *Amount) UnmarshalJSON(bytes []byte) error {
 }
 
 func (a Amount) MarshalJSON() ([]byte, error) {
-	return []byte(FloatStrTrim(string(a))), nil
+	return json.Marshal(FloatStrTrim(string(a)))
 }
