@@ -41,8 +41,6 @@ func MapConvertStructByTag(input map[string]string, obj interface{}, tag string)
 		flag := 1
 		if (fieldType.Kind() == reflect.Struct || fieldType.Kind() == reflect.Slice || fieldType.Kind() == reflect.Array) && tagName != "" {
 			if val, ok := input[tagName]; ok {
-				newValue := reflect.New(fieldType)
-				v.Field(i).Set(newValue)
 				if v.Field(i).CanAddr() {
 					if structConvert, ok2 := v.Field(i).Addr().Interface().(ConversionFrom); ok2 {
 						err = structConvert.FromSource(val)
@@ -371,8 +369,24 @@ func AnonymousStructAssignment(ft reflect.StructField, fv reflect.Value, tag str
 		flag := 1
 		if (fieldType.Kind() == reflect.Struct || fieldType.Kind() == reflect.Slice || fieldType.Kind() == reflect.Array) && tagName != "" {
 			if val, ok := input[tagName]; ok {
-				_ = json.Unmarshal([]byte(val), fv.Field(j).Addr().Interface())
-				flag = 2
+				if fv.Field(j).CanAddr() {
+					if structConvert, ok2 := fv.Field(j).Addr().Interface().(ConversionFrom); ok2 {
+						err = structConvert.FromSource(val)
+						if err != nil {
+							return
+						}
+						continue
+					} else {
+						_ = json.Unmarshal([]byte(val), fv.Field(j).Addr().Interface())
+					}
+				}
+				if structConvert, ok2 := fv.Field(j).Interface().(ConversionFrom); ok2 {
+					err = structConvert.FromSource(val)
+					if err != nil {
+						return
+					}
+					continue
+				}
 			}
 		}
 

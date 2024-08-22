@@ -24,6 +24,7 @@ func TestMapConvertStructByTag(t *testing.T) {
 					"account":  "[{\"balance\": \"200\",\"other_balance\": \"\"}]",
 					"birthday": "2020-01-01",
 					"ptr":      "111",
+					"custom":   "{\"balance\": \"200\",\"other_balance\": \"\"}",
 				},
 				obj: &TestStruct{},
 				tag: "json",
@@ -49,6 +50,7 @@ type TestStruct struct {
 	Account  *CustomStructList `json:"account"`
 	Birthday Birthday          `json:"birthday"`
 	Ptr      *string           `json:"ptr"`
+	Custom   CustomStruct      `json:"custom"`
 }
 
 type CustomStruct struct {
