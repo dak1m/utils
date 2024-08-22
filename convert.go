@@ -48,16 +48,20 @@ func MapConvertStructByTag(input map[string]string, obj interface{}, tag string)
 							return
 						}
 						continue
-					} else {
-						_ = json.Unmarshal([]byte(val), v.Field(i).Addr().Interface())
 					}
 				}
-				if structConvert, ok2 := v.Field(i).Interface().(ConversionFrom); ok2 {
+				if _, ok2 := v.Field(i).Interface().(ConversionFrom); ok2 {
+					newValue := reflect.New(fieldType)
+					v.Field(i).Set(newValue)
+					structConvert := v.Field(i).Interface().(ConversionFrom)
 					err = structConvert.FromSource(val)
 					if err != nil {
 						return
 					}
 					continue
+				}
+				if v.Field(i).CanAddr() {
+					_ = json.Unmarshal([]byte(val), v.Field(i).Addr().Interface())
 				}
 
 				flag = 2
@@ -376,16 +380,20 @@ func AnonymousStructAssignment(ft reflect.StructField, fv reflect.Value, tag str
 							return
 						}
 						continue
-					} else {
-						_ = json.Unmarshal([]byte(val), fv.Field(j).Addr().Interface())
 					}
 				}
-				if structConvert, ok2 := fv.Field(j).Interface().(ConversionFrom); ok2 {
+				if _, ok2 := fv.Field(j).Interface().(ConversionFrom); ok2 {
+					newValue := reflect.New(fieldType)
+					fv.Field(j).Set(newValue)
+					structConvert := fv.Field(j).Interface().(ConversionFrom)
 					err = structConvert.FromSource(val)
 					if err != nil {
 						return
 					}
 					continue
+				}
+				if fv.Field(j).CanAddr() {
+					_ = json.Unmarshal([]byte(val), fv.Field(j).Addr().Interface())
 				}
 			}
 		}
