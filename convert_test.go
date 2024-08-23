@@ -51,6 +51,11 @@ type TestStruct struct {
 	Birthday Birthday          `json:"birthday"`
 	Ptr      *string           `json:"ptr"`
 	Custom   CustomStruct      `json:"custom"`
+	Anonymous
+}
+
+type Anonymous struct {
+	Height int `json:"height" canzero:"height"`
 }
 
 type CustomStruct struct {
@@ -122,5 +127,41 @@ func TestStructConvertMapByTag(t *testing.T) {
 				}
 			},
 		)
+	}
+}
+
+func TestAllFieldsByTag(t *testing.T) {
+	type args struct {
+		obj interface{}
+		tag string
+	}
+	tests := []struct {
+		name string
+		args args
+		want []string
+	}{
+		{
+			name: "TestAllFieldsByTag",
+			args: args{
+				obj: TestStruct{},
+				tag: "canzero",
+			},
+			want: []string{"height"},
+		},
+		{
+			name: "TestAllFieldsByTag",
+			args: args{
+				obj: TestStruct{},
+				tag: "json",
+			},
+			want: []string{"normal", "account", "birthday", "ptr", "custom", "height"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := AllFieldsByTag(tt.args.obj, tt.args.tag); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("AllFieldsByTag() = %v, want %v", got, tt.want)
+			}
+		})
 	}
 }

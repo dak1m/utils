@@ -475,43 +475,29 @@ func AllFieldsByTag(obj interface{}, tag string) []string {
 	v := reflect.ValueOf(obj)
 	data := make([]string, 0)
 
-	for i := 0; i < t.NumField(); i++ {
-		tagName := t.Field(i).Tag.Get(tag)
-		if tagName == "-" {
-			continue
-		}
+	var fnc func(reflect.Type, reflect.Value)
+	fnc = func(t reflect.Type, v reflect.Value) {
+		for i := 0; i < t.NumField(); i++ {
+			tagName := t.Field(i).Tag.Get(tag)
+			if tagName == "-" {
+				continue
+			}
 
-		tagName = strings.Replace(tagName, ",omitempty", "", -1)
-		field := t.Field(i)
-		if field.Type.Kind() == reflect.Struct && tagName == "" && field.Anonymous {
-			// 匿名嵌套结构体
-			data = anonymousStructToField(t.Field(i), v.Field(i), tag, data)
-			continue
-		} else {
-			data = append(data, tagName)
+			tagName = strings.Replace(tagName, ",omitempty", "", -1)
+			field := t.Field(i)
+			if field.Type.Kind() == reflect.Struct && tagName == "" && field.Anonymous {
+				// 匿名嵌套结构体
+				fnc(t.Field(i).Type, v.Field(i))
+			} else {
+				if tagName == "" {
+					continue
+				}
+				data = append(data, tagName)
+			}
 		}
 	}
-	return data
-}
 
-func anonymousStructToField(field reflect.StructField, value reflect.Value, tag string, data []string) []string {
-	t := field.Type
-	for i := 0; i < t.NumField(); i++ {
-		tagName := t.Field(i).Tag.Get(tag)
-		if tagName == "-" {
-			continue
-		}
-
-		tagName = strings.Replace(tagName, ",omitempty", "", -1)
-		field := t.Field(i)
-		if field.Type.Kind() == reflect.Struct && tagName == "" && field.Anonymous {
-			// 匿名嵌套结构体
-			anonymousStructToField(t.Field(i), value.Field(i), tag, data)
-			continue
-		} else {
-			data = append(data, tagName)
-		}
-	}
+	fnc(t, v)
 
 	return data
 }
