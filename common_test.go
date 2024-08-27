@@ -28,11 +28,11 @@ func TestIsOnlySet(t *testing.T) {
 				}{
 					Id:    "1",
 					Start: timePtr(time.Now()),
-					Nest: Nest{
-						Name: "name",
-					},
+					//Nest: Nest{
+					//	NestName: "name",
+					//},
 				},
-				field:   "start",
+				field:   "nest_name",
 				exclude: []string{"id"},
 			},
 			want: true,
@@ -51,5 +51,5 @@ func timePtr(t time.Time) *time.Time {
 }
 
 type Nest struct {
-	Name string
+	NestName string `json:"nest_name"`
 }

@@ -14,20 +14,34 @@ var DefaultTag = "json"
 func IsOnlySet(obj any, field string, exclude ...string) bool {
 	t := reflect.TypeOf(obj)
 	v := reflect.ValueOf(obj)
-	for i := 0; i < v.NumField(); i++ {
-		reflectField := v.Field(i)
-		name := t.Field(i).Tag.Get(DefaultTag)
-		if name == field {
-			if reflectField.IsZero() {
-				return false
+	var fnc func(reflect.Type, reflect.Value) bool
+	fnc = func(t reflect.Type, v reflect.Value) bool {
+		for i := 0; i < v.NumField(); i++ {
+			reflectField := v.Field(i)
+			name := t.Field(i).Tag.Get(DefaultTag)
+
+			if t.Field(i).Type.Kind() == reflect.Struct && name == "" && t.Field(i).Anonymous {
+				// 匿名嵌套结构体
+				fnc(t.Field(i).Type, v.Field(i))
+			} else {
+				if name == field {
+					if reflectField.IsZero() {
+						return false
+					}
+				} else if !slices.Contains(exclude, name) {
+					if !reflectField.IsZero() {
+						return false
+
+					}
+				}
 			}
-		} else if !slices.Contains(exclude, name) {
-			if !reflectField.IsZero() {
-				return false
-			}
+
 		}
+
+		return true
 	}
-	return true
+
+	return fnc(t, v)
 }
 
 func FloatStrTrim(s string) string {
