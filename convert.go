@@ -314,9 +314,10 @@ func AnonymousStructToMap(ft reflect.StructField, fv reflect.Value, tag string, 
 				if fv.Field(j).IsNil() {
 					continue
 				}
-			}
 
-			data[tagName], _ = json.Marshal(fv.Field(j).Interface())
+			}
+			b, _ := json.Marshal(fv.Field(j).Interface())
+			data[tagName] = string(b)
 			flag = 2
 		}
 
