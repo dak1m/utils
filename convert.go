@@ -395,6 +395,8 @@ func AnonymousStructAssignment(ft reflect.StructField, fv reflect.Value, tag str
 				if fv.Field(j).CanAddr() {
 					_ = json.Unmarshal([]byte(val), fv.Field(j).Addr().Interface())
 				}
+
+				flag = 2
 			}
 		}
 
