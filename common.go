@@ -22,7 +22,9 @@ func IsOnlySet(obj any, field string, exclude ...string) bool {
 
 			if t.Field(i).Type.Kind() == reflect.Struct && name == "" && t.Field(i).Anonymous {
 				// 匿名嵌套结构体
-				fnc(t.Field(i).Type, v.Field(i))
+				if !fnc(t.Field(i).Type, v.Field(i)) {
+					return false
+				}
 			} else {
 				if name == field {
 					if reflectField.IsZero() {

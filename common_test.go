@@ -28,11 +28,11 @@ func TestIsOnlySet(t *testing.T) {
 				}{
 					Id:    "1",
 					Start: timePtr(time.Now()),
-					//Nest: Nest{
-					//	NestName: "name",
-					//},
+					Nest: Nest{
+						NestName: "name",
+					},
 				},
-				field:   "nest_name",
+				field:   "start",
 				exclude: []string{"id"},
 			},
 			want: true,
