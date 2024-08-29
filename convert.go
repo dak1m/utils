@@ -446,7 +446,8 @@ func HandleFields(fields map[string]any) map[string]any {
 		t := reflect.TypeOf(v)
 		flag := 1
 		if t.Kind() == reflect.Struct || t.Kind() == reflect.Slice {
-			newFields[k], _ = json.Marshal(v)
+			b, _ := json.Marshal(v)
+			newFields[k] = string(b)
 			flag = 2
 		}
 		switch value := v.(type) {
