@@ -505,13 +505,13 @@ func AllFieldsByTag(obj interface{}, tag string) []string {
 	return data
 }
 
-func GenerateTypeMapping(obj any) map[string]any {
+func GenerateTypeMapping(obj any, tagName string) map[string]any {
 	typeMapping := make(map[string]interface{})
 	fields := reflect.TypeOf(obj)
 
 	for i := 0; i < fields.NumField(); i++ {
 		field := fields.Field(i)
-		fieldName := field.Tag.Get("json")
+		fieldName := field.Tag.Get(tagName)
 		fieldType := field.Type
 
 		switch fieldType.Kind() {
@@ -548,6 +548,8 @@ func GenerateTypeMapping(obj any) map[string]any {
 				typeMapping[fieldName] = &[]float32{}
 			case reflect.Bool:
 				typeMapping[fieldName] = &[]bool{}
+			case reflect.Interface:
+				typeMapping[fieldName] = &[]any{}
 			default:
 				continue
 			}

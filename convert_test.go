@@ -184,7 +184,7 @@ func TestGenerateTypeMapping(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := GenerateTypeMapping(tt.args.obj)
+			got := GenerateTypeMapping(tt.args.obj, "json")
 			t.Log(got)
 		})
 	}
@@ -194,5 +194,6 @@ type TestGenerateTypeMappingStruct struct {
 	Normal     []string       `json:"normal"`
 	CustomList []CustomStruct `json:"custom_list"`
 	Custom     CustomStruct   `json:"custom"`
+	Any        []any          `json:"any"`
 	Anonymous
 }
