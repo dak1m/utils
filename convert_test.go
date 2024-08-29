@@ -165,3 +165,34 @@ func TestAllFieldsByTag(t *testing.T) {
 		})
 	}
 }
+
+func TestGenerateTypeMapping(t *testing.T) {
+	type args struct {
+		obj any
+	}
+	tests := []struct {
+		name string
+		args args
+		want map[string]any
+	}{
+		{
+			name: "TestGenerateTypeMapping",
+			args: args{
+				obj: TestGenerateTypeMappingStruct{},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := GenerateTypeMapping(tt.args.obj)
+			t.Log(got)
+		})
+	}
+}
+
+type TestGenerateTypeMappingStruct struct {
+	Normal     []string       `json:"normal"`
+	CustomList []CustomStruct `json:"custom_list"`
+	Custom     CustomStruct   `json:"custom"`
+	Anonymous
+}

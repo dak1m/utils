@@ -504,3 +504,61 @@ func AllFieldsByTag(obj interface{}, tag string) []string {
 
 	return data
 }
+
+func GenerateTypeMapping(obj any) map[string]any {
+	typeMapping := make(map[string]interface{})
+	fields := reflect.TypeOf(obj)
+
+	for i := 0; i < fields.NumField(); i++ {
+		field := fields.Field(i)
+		fieldName := field.Tag.Get("json")
+		fieldType := field.Type
+
+		switch fieldType.Kind() {
+		case reflect.Slice:
+			elemType := fieldType.Elem()
+			switch elemType.Kind() {
+			case reflect.Struct:
+				typeMapping[fieldName] = reflect.New(reflect.SliceOf(elemType)).Interface()
+			case reflect.String:
+				typeMapping[fieldName] = &[]string{}
+			case reflect.Uint:
+				typeMapping[fieldName] = &[]uint{}
+			case reflect.Uint8:
+				typeMapping[fieldName] = &[]uint8{}
+			case reflect.Uint16:
+				typeMapping[fieldName] = &[]uint16{}
+			case reflect.Uint32:
+				typeMapping[fieldName] = &[]uint32{}
+			case reflect.Uint64:
+				typeMapping[fieldName] = &[]uint64{}
+			case reflect.Int:
+				typeMapping[fieldName] = &[]int{}
+			case reflect.Int8:
+				typeMapping[fieldName] = &[]int8{}
+			case reflect.Int16:
+				typeMapping[fieldName] = &[]int16{}
+			case reflect.Int32:
+				typeMapping[fieldName] = &[]int32{}
+			case reflect.Int64:
+				typeMapping[fieldName] = &[]int64{}
+			case reflect.Float64:
+				typeMapping[fieldName] = &[]float64{}
+			case reflect.Float32:
+				typeMapping[fieldName] = &[]float32{}
+			case reflect.Bool:
+				typeMapping[fieldName] = &[]bool{}
+			default:
+				continue
+			}
+		case reflect.Struct:
+			if !field.Anonymous {
+				typeMapping[fieldName] = reflect.New(fieldType).Interface()
+			}
+		default:
+			continue
+		}
+	}
+
+	return typeMapping
+}
