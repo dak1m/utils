@@ -197,3 +197,30 @@ type TestGenerateTypeMappingStruct struct {
 	Any        []any          `json:"any"`
 	Anonymous
 }
+
+func TestHandleFields(t *testing.T) {
+	type args struct {
+		fields map[string]any
+	}
+	tests := []struct {
+		name string
+		args args
+		want map[string]any
+	}{
+		{
+			name: "TestHandleFields",
+			args: args{
+				fields: map[string]any{
+					"normal":      []string{"1", "2"},
+					"custom_list": nil,
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := HandleFields(tt.args.fields)
+			t.Log(got)
+		})
+	}
+}

@@ -444,6 +444,9 @@ func HandleFields(fields map[string]any) map[string]any {
 	newFields := make(map[string]any, len(fields))
 	for k, v := range fields {
 		t := reflect.TypeOf(v)
+		if t == nil {
+			continue
+		}
 		flag := 1
 		if t.Kind() == reflect.Struct || t.Kind() == reflect.Slice {
 			b, _ := json.Marshal(v)
