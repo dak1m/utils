@@ -75,19 +75,26 @@ func MapConvertStructByTag(input map[string]string, obj interface{}, tag string)
 		switch v.Field(i).Interface().(type) {
 		case time.Time:
 			if val, ok := input[tagName]; ok {
-				time, err := time.ParseInLocation(time.RFC3339, val, time.Local)
+				timeParse, err := time.ParseInLocation(time.RFC3339, val, time.Local)
 				if err != nil {
-					return err
+					timeParse, err = time.ParseInLocation(time.DateTime, val, time.Local)
+					if err != nil {
+						return err
+					}
 				}
-				v.Field(i).Set(reflect.ValueOf(time))
+				v.Field(i).Set(reflect.ValueOf(timeParse))
 			}
 		case *time.Time:
 			if val, ok := input[tagName]; ok {
-				time, err := time.ParseInLocation(time.RFC3339, val, time.Local)
+				timeParse, err := time.ParseInLocation(time.RFC3339, val, time.Local)
 				if err != nil {
+					timeParse, err = time.ParseInLocation(time.DateTime, val, time.Local)
+					if err != nil {
+						return err
+					}
 					return err
 				}
-				v.Field(i).Set(reflect.ValueOf(&time))
+				v.Field(i).Set(reflect.ValueOf(&timeParse))
 			}
 		default:
 			if val, ok := input[tagName]; ok && flag == 1 {
@@ -410,7 +417,10 @@ func AnonymousStructAssignment(ft reflect.StructField, fv reflect.Value, tag str
 			if val, ok := input[tagName]; ok && val != "" {
 				t, err := time.ParseInLocation(time.RFC3339, val, time.Local)
 				if err != nil {
-					return err
+					t, err = time.ParseInLocation(time.DateTime, val, time.Local)
+					if err != nil {
+						return err
+					}
 				}
 				fv.Field(j).Set(reflect.ValueOf(t))
 			}
@@ -418,7 +428,10 @@ func AnonymousStructAssignment(ft reflect.StructField, fv reflect.Value, tag str
 			if val, ok := input[tagName]; ok && val != "" {
 				t, err := time.ParseInLocation(time.RFC3339, val, time.Local)
 				if err != nil {
-					return err
+					t, err = time.ParseInLocation(time.DateTime, val, time.Local)
+					if err != nil {
+						return err
+					}
 				}
 				fv.Field(j).Set(reflect.ValueOf(&t))
 			}
